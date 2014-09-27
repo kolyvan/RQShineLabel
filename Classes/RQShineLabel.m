@@ -69,10 +69,6 @@
   
   _characterAnimationDurations = [NSMutableArray array];
   _characterAnimationDelays    = [NSMutableArray array];
-  
-  _displaylink = [CADisplayLink displayLinkWithTarget:self selector:@selector(updateAttributedString)];
-  _displaylink.paused = YES;
-  [_displaylink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
 }
 
 - (void)didMoveToWindow
@@ -105,7 +101,6 @@
 
 - (void)shineWithCompletion:(void (^)())completion
 {
-  
   if (!self.isShining && self.isFadedOut) {
     self.completion = completion;
     self.fadedOut = NO;
@@ -129,7 +124,10 @@
 
 - (BOOL)isShining
 {
-  return !self.displaylink.isPaused;
+    if (_displaylink) {
+        return !_displaylink.isPaused;
+    }
+    return NO;
 }
 
 - (BOOL)isVisible
@@ -142,8 +140,15 @@
 
 - (void)startAnimation
 {
-  self.beginTime = CACurrentMediaTime();
-  self.displaylink.paused = NO;
+    if (!_displaylink) {
+        
+        _displaylink = [CADisplayLink displayLinkWithTarget:self selector:@selector(updateAttributedString)];
+        _displaylink.paused = YES;
+        [_displaylink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
+    }
+    
+    self.beginTime = CACurrentMediaTime();
+    self.displaylink.paused = NO;
 }
 
 - (void)updateAttributedString
@@ -187,5 +192,11 @@
   return mutableAttributedString;
 }
 
+- (void) stopAnimation
+{
+    [_displaylink invalidate];
+    _displaylink = nil;
+    _completion = nil;
+}
 
 @end

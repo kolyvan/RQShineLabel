@@ -44,4 +44,6 @@
 - (void)fadeOut;
 - (void)fadeOutWithCompletion:(void (^)())completion;
 
+- (void) stopAnimation;
+
 @end
